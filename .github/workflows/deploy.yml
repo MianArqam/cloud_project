@@ -1,0 +1,122 @@
+name: Deploy Smart Disaster Management System to AWS
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & Deploy to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      # ==========================================
+      # 📥 STEP 1: CHECKOUT CODE
+      # ==========================================
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # ==========================================
+      # 🔧 STEP 2: CONFIGURE AWS CREDENTIALS
+      # ==========================================
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # ==========================================
+      # 🏗️ STEP 3: SETUP TERRAFORM
+      # ==========================================
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          terraform_wrapper: false # Disabled to easily read raw outputs in steps
+
+      - name: Ensure Terraform State Bucket Exists
+        run: |
+          aws s3api head-bucket --bucket cloud-project-tfstate-mianarqam 2>/dev/null || \
+          aws s3api create-bucket --bucket cloud-project-tfstate-mianarqam --region us-east-1
+
+      # ==========================================
+      # 🧱 STEP 4: PROVISION INFRASTRUCTURE
+      # ==========================================
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+        env:
+          TF_VAR_mongodb_uri: ${{ secrets.MONGODB_URI }}
+
+      # ==========================================
+      # 🌐 STEP 5: FETCH TERRAFORM OUTPUTS
+      # ==========================================
+      - name: Fetch Deployment Endpoints
+        id: tf-outputs
+        run: |
+          ALB_DNS=$(terraform output -raw backend_alb_dns_name)
+          S3_BUCKET=$(terraform output -raw s3_bucket_name)
+          ECR_REPO=$(terraform output -raw ecr_repository_url)
+          CF_DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[0].Id=='S3-Frontend'].Id" --output text)
+          
+          echo "ALB_DNS=$ALB_DNS" >> $GITHUB_ENV
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_ENV
+          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
+          echo "CF_DIST_ID=$CF_DIST_ID" >> $GITHUB_ENV
+        working-directory: ./terraform
+
+      # ==========================================
+      # 🐳 STEP 6: BUILD & PUSH BACKEND TO ECR
+      # ==========================================
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, Tag, and Push Backend Image
+        run: |
+          docker build -t $ECR_REPO:latest ./backend
+          docker push $ECR_REPO:latest
+
+      - name: Trigger ECS Fargate Rolling Update
+        run: |
+          aws ecs update-service --cluster cloud-project-cluster --service cloud-project-service --force-new-deployment
+
+      # ==========================================
+      # 💻 STEP 7: BUILD FRONTEND (WITH ALB URL)
+      # ==========================================
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Frontend Dependencies
+        run: npm install --legacy-peer-deps
+        working-directory: ./frontend
+
+      - name: Build Frontend React App
+        run: npm run build
+        working-directory: ./frontend
+        env:
+          VITE_API_URL: http://${{ env.ALB_DNS }}/api
+          VITE_SOCKET_URL: http://${{ env.ALB_DNS }}
+
+      # ==========================================
+      # 📤 STEP 8: UPLOAD FRONTEND TO S3 & INVALIDATE CDN
+      # ==========================================
+      - name: Deploy Frontend to S3 Bucket
+        run: |
+          aws s3 sync ./frontend/dist/ s3://${{ env.S3_BUCKET }} --delete
+
+      - name: Invalidate CloudFront CDN Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ env.CF_DIST_ID }} --paths "/*"
