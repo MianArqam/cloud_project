@@ -132,7 +132,7 @@ jobs:
 
       - name: Trigger ECS Fargate Rolling Update
         run: |
-          aws ecs update-service --cluster cloud-project-cluster --service cloud-project-service --force-new-deployment
+          aws ecs update-service --cluster cloud-project-ecs-cluster --service cloud-project-service --force-new-deployment
 
       # ==========================================
       # 💻 STEP 7: BUILD FRONTEND (WITH ALB URL)
