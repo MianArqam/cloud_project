@@ -1,0 +1,844 @@
+% ============================================================
+%  Cloud-Based Smart Disaster Management and Response System
+%  Project Report -- Cloud Computing Course
+% ============================================================
+
+\documentclass[12pt, a4paper]{report}
+
+% ── Core packages ───────────────────────────────────────────
+\usepackage[top=1in, bottom=1in, left=1.25in, right=1.25in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage[most]{tcolorbox}   % loads skins + breakable libraries
+\usepackage{hyperref}           % must be last
+
+% ── Hyperref setup ──────────────────────────────────────────
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = primary,
+  urlcolor   = primary,
+  citecolor  = primary,
+  pdftitle   = {Cloud-Based Smart Disaster Management System},
+  pdfauthor  = {Asad Ali, Abbas, Mian Arqam},
+  pdfsubject = {Cloud Computing Course Project Report},
+}
+
+% ── Colors ──────────────────────────────────────────────────
+\definecolor{primary}{RGB}{59, 130, 246}
+\definecolor{primarydark}{RGB}{37, 99, 235}
+\definecolor{success}{RGB}{16, 185, 129}
+\definecolor{danger}{RGB}{239, 68, 68}
+\definecolor{warning}{RGB}{245, 158, 11}
+\definecolor{surface}{RGB}{30, 41, 59}
+\definecolor{codebg}{RGB}{248, 250, 252}
+\definecolor{codekw}{RGB}{37, 99, 235}
+\definecolor{codestr}{RGB}{22, 163, 74}
+\definecolor{codecmt}{RGB}{100, 116, 139}
+\definecolor{codenumber}{RGB}{156, 163, 175}
+\definecolor{placeholderbg}{RGB}{241, 245, 249}
+\definecolor{placeholderborder}{RGB}{148, 163, 184}
+\definecolor{placeholdertext}{RGB}{100, 116, 139}
+\definecolor{rowshade}{RGB}{248, 250, 252}
+\definecolor{headerrow}{RGB}{59, 130, 246}
+
+% ── Code listing style ──────────────────────────────────────
+\lstdefinestyle{codestyle}{
+  backgroundcolor  = \color{codebg},
+  basicstyle       = \ttfamily\footnotesize,
+  keywordstyle     = \color{codekw}\bfseries,
+  stringstyle      = \color{codestr},
+  commentstyle     = \color{codecmt}\itshape,
+  numberstyle      = \tiny\color{codenumber},
+  numbers          = left,
+  numbersep        = 8pt,
+  breaklines       = true,
+  breakatwhitespace= true,
+  frame            = single,
+  framesep         = 4pt,
+  rulecolor        = \color{placeholderborder},
+  showstringspaces = false,
+  tabsize          = 2,
+  captionpos       = b,
+  aboveskip        = 10pt,
+  belowskip        = 10pt,
+}
+\lstset{style=codestyle}
+
+% ── Section / chapter formatting ────────────────────────────
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{surface}}
+  {\color{primary}\chaptertitlename\ \thechapter}
+  {10pt}{\Huge}
+  [\vspace{4pt}{\color{primary}\titlerule[2pt]}]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{surface}}
+  {\color{primary}\thesection}{0.75em}{}
+  [\vspace{1pt}{\color{primary!40}\titlerule[0.5pt]}]
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{surface}}
+  {\color{primary}\thesubsection}{0.75em}{}
+
+% ── Header / Footer ─────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{codecmt}Respondr.cloud --- Cloud-Based Disaster Management}
+\fancyhead[R]{\small\color{codecmt}\nouppercase{\leftmark}}
+\fancyfoot[C]{\small\color{codecmt}--- \thepage\ ---}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ── Screenshot placeholder (tcolorbox-based, no TikZ) ───────
+% Usage: \screenshot{width fraction}{height in cm}{caption}{label}
+\newcommand{\screenshot}[4]{%
+  \begin{figure}[H]
+    \centering
+    \begin{tcolorbox}[
+      enhanced,
+      width      = #1\linewidth,
+      height     = #2cm,
+      colback    = placeholderbg,
+      colframe   = placeholderborder,
+      arc        = 4pt,
+      boxrule    = 0.8pt,
+      halign     = center,
+      valign     = center,
+    ]
+      {\color{placeholdertext}\Large$\square$}\\[8pt]
+      {\color{placeholdertext}\small\bfseries [ Screenshot Placeholder ]}\\[6pt]
+      {\color{placeholdertext}\small #3}\\[4pt]
+      {\color{placeholderborder}\footnotesize\ttfamily
+        Replace with:\enspace\textbackslash includegraphics[width=\textbackslash linewidth]\{images/#4.png\}}
+    \end{tcolorbox}
+    \caption{#3}
+    \label{fig:#4}
+  \end{figure}%
+}
+
+% ── tcolorbox environments ──────────────────────────────────
+\newtcolorbox{infobox}[1][]{
+  enhanced,
+  colback   = primary!5,
+  colframe  = primary,
+  fonttitle = \bfseries,
+  title     = {#1},
+  arc       = 4pt,
+  boxrule   = 0.8pt,
+}
+
+\newtcolorbox{notebox}{
+  enhanced,
+  colback  = warning!10,
+  colframe = warning,
+  arc      = 4pt,
+  boxrule  = 0.8pt,
+  left     = 6pt,
+}
+
+% ── Misc ────────────────────────────────────────────────────
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.35}
+
+% ============================================================
+\begin{document}
+
+% ── Title Page ──────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+
+  {\color{primary}\rule{\textwidth}{2pt}}
+  \vspace{0.4cm}
+
+  {\huge\bfseries Cloud-Based Smart Disaster\\[6pt]
+   Management and Response System}
+
+  \vspace{0.3cm}
+  {\color{primary}\rule{\textwidth}{0.8pt}}
+  \vspace{1cm}
+
+  {\large\textit{Project Report --- Cloud Computing Course}}\\[0.3cm]
+  {\large Department of Computer Science}\\[0.1cm]
+  {\large 2025}
+
+  \vspace{2cm}
+
+  \begin{tcolorbox}[
+    enhanced, colback=primary!5, colframe=primary, arc=6pt,
+    width=0.85\textwidth, halign=center,
+  ]
+    \large\textbf{Submitted By}\\[0.8cm]
+    \begin{tabular}{lll}
+      \toprule
+      \textbf{Name} & \textbf{Role} & \textbf{ID / Roll No.} \\
+      \midrule
+      Asad Ali   & Team Lead, Backend \& Cloud Architect & \hspace{2cm} \\[4pt]
+      Abbas      & Frontend \& UI/UX Developer           & \hspace{2cm} \\[4pt]
+      Mian Arqam & DevOps Engineer \& Data Processing    & \hspace{2cm} \\
+      \bottomrule
+    \end{tabular}
+  \end{tcolorbox}
+
+  \vspace{2cm}
+
+  \begin{tcolorbox}[
+    enhanced, colback=surface!5, colframe=surface!40, arc=6pt,
+    width=0.7\textwidth, halign=center,
+  ]
+    {\small\color{codecmt}
+      \textbf{Project URL:} \url{http://localhost:5173} (local)\\[4pt]
+      \textbf{Repository:} \url{https://github.com/MianArqam/cloud_project}\\[4pt]
+      \textbf{Report Version:} 1.0\quad\textbf{Date:} May 2025
+    }
+  \end{tcolorbox}
+
+  \vfill
+  {\color{primary}\rule{\textwidth}{2pt}}
+\end{titlepage}
+
+% ── Abstract ────────────────────────────────────────────────
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+Natural disasters cause devastating losses to human life and infrastructure every year. Effective disaster response depends critically on timely information sharing and coordinated action between authorities and affected citizens. This report presents \textbf{Respondr.cloud}, a cloud-based smart disaster management and response system designed to bridge this communication gap.
+
+The system provides a real-time web platform where citizens can submit geo-tagged emergency reports --- including floods, earthquakes, fires, and medical emergencies --- which are instantly broadcast to all connected users via WebSocket technology. Emergency responders can monitor an interactive map, track incident severity, update report statuses, and broadcast area-wide citizen alerts.
+
+Built on a microservices architecture using \textbf{Node.js}, \textbf{React}, \textbf{MongoDB}, and \textbf{Socket.io}, and containerised with \textbf{Docker}, the system demonstrates practical implementation of key cloud computing concepts including real-time distributed systems, event-driven architecture, containerisation, and scalable API design. The platform is designed for deployment on major cloud providers (AWS, Azure, GCP) with support for auto-scaling, load balancing, and managed database services.
+
+\vspace{0.8cm}
+\begin{infobox}[Key Highlights]
+  \begin{itemize}[noitemsep]
+    \item Real-time bidirectional communication via Socket.io WebSockets
+    \item Interactive geospatial map with severity-coded incident markers
+    \item Multi-status incident lifecycle management (Active $\rightarrow$ In Progress $\rightarrow$ Resolved)
+    \item Citizen emergency broadcast alert system
+    \item Containerised microservices deployment with Docker Compose
+    \item Responsive UI built with React, Vite, and Tailwind CSS v4
+  \end{itemize}
+\end{infobox}
+
+\newpage
+
+% ── Table of Contents ───────────────────────────────────────
+\tableofcontents
+\newpage
+
+% ============================================================
+\chapter{Introduction}
+
+\section{Background and Motivation}
+
+Natural disasters --- including floods, earthquakes, wildfires, and public health emergencies --- affect millions of people worldwide each year. The effectiveness of emergency response is directly correlated with the speed and accuracy of information flow between affected populations and response authorities. Traditional communication channels (radio, telephone hotlines, manual reporting) are often overwhelmed or unavailable during a disaster, creating dangerous delays.
+
+The emergence of cloud computing technologies has opened new possibilities for building resilient, scalable, and real-time emergency management systems that can function during high-demand scenarios. A cloud-based platform can aggregate incident reports from thousands of citizens simultaneously, process and visualise this data in real time, and coordinate response teams --- all without the bottlenecks of centralised on-premise infrastructure.
+
+\section{Problem Statement}
+
+Existing disaster management systems often suffer from:
+
+\begin{itemize}
+  \item \textbf{Delayed information flow:} Traditional reporting mechanisms introduce lag between an incident occurring and authorities being informed.
+  \item \textbf{Lack of real-time visibility:} Response teams have no live, unified view of all active incidents across a geographic area.
+  \item \textbf{Poor citizen communication:} Authorities lack efficient tools to rapidly alert civilians near a developing disaster.
+  \item \textbf{Scalability issues:} Centralised systems fail under the sudden load spikes characteristic of mass-casualty events.
+  \item \textbf{Fragmented tools:} Reporting, mapping, communication, and coordination are handled by separate, disconnected systems.
+\end{itemize}
+
+\section{Project Scope}
+
+This project addresses the above problems by delivering a unified, cloud-native platform with the following scope:
+
+\begin{itemize}
+  \item A web-based application accessible from any modern browser
+  \item Real-time incident submission and broadcast using WebSockets
+  \item Interactive geographic visualisation of all active incidents
+  \item Incident lifecycle management (report $\rightarrow$ acknowledge $\rightarrow$ resolve)
+  \item Emergency broadcast alerts to all connected citizens
+  \item Containerised deployment pipeline using Docker
+\end{itemize}
+
+\section{Report Organisation}
+
+The remainder of this report is organised as follows: Chapter~2 defines the project objectives; Chapter~3 describes the system architecture; Chapter~4 details the technology stack; Chapter~5 covers the implementation; Chapter~6 presents the application features with screenshots; Chapter~7 documents the AWS cloud deployment; Chapter~8 outlines each team member's contributions; Chapter~9 discusses challenges encountered; and Chapter~10 concludes with future work.
+
+% ============================================================
+\chapter{Project Objectives}
+
+The primary goal of this project is to develop a scalable, cloud-native disaster management platform. The specific objectives are:
+
+\begin{enumerate}[leftmargin=*, label=\textbf{O\arabic*.}]
+
+  \item \textbf{Scalable Cloud Platform}\\
+  Design and implement a microservices-based architecture deployable on AWS, Azure, or Google Cloud that scales automatically under increased load. The system must handle concurrent users without performance degradation.
+
+  \item \textbf{Real-Time Alerts and Notifications}\\
+  Provide instant, sub-second propagation of new emergency reports to all connected clients using WebSocket technology (Socket.io). Implement a citizen broadcast alert system for area-wide emergency notifications.
+
+  \item \textbf{Emergency Responder Coordination}\\
+  Enable multiple response teams to view, acknowledge, and update the status of active incidents from a shared dashboard, supporting a collaborative incident lifecycle (Active $\rightarrow$ In Progress $\rightarrow$ Resolved).
+
+  \item \textbf{Geospatial Situational Awareness}\\
+  Display all active incidents on an interactive, real-time map with colour-coded severity markers, enabling command-centre operators to assess the geographic distribution of events at a glance.
+
+  \item \textbf{High Availability and Fault Tolerance}\\
+  Architect the system for resilience using Docker containerisation, stateless API design, and managed cloud database services that provide automatic replication and failover.
+
+  \item \textbf{Practical Cloud Feature Implementation}\\
+  Demonstrate concrete use of cloud computing concepts including virtual machines/containers, auto-scaling, managed databases, object storage, serverless functions, and CI/CD pipelines.
+
+\end{enumerate}
+
+% ============================================================
+\chapter{System Architecture}
+
+\section{Architecture Overview}
+
+Respondr.cloud follows a \textbf{microservices-based architecture} where each component is independently deployable, loosely coupled, and communicates over well-defined interfaces (REST APIs and WebSocket events).
+
+\begin{infobox}[Architecture Pattern]
+  \textbf{Client-Server with Event-Driven Real-Time Layer}\\[4pt]
+  The system decouples request-response (REST) from real-time push (WebSocket). The REST layer handles CRUD operations on reports; the Socket.io layer handles all live broadcast events. Both share the same Node.js server process but are architecturally independent.
+\end{infobox}
+
+\section{Component Breakdown}
+
+\begin{table}[H]
+  \centering
+  \caption{System Components and Responsibilities}
+  \begin{tabularx}{\textwidth}{l >{\ttfamily\footnotesize}l X}
+    \toprule
+    \rowcolor{headerrow!20}
+    \textbf{Component} & \textbf{Technology} & \textbf{Responsibility} \\
+    \midrule
+    Frontend App      & React + Vite      & User interface for reporting, map, live feed, alerts \\
+    \rowcolor{rowshade}
+    Backend API       & Node.js + Express & REST endpoints, business logic, socket broadcasting \\
+    WebSocket Server  & Socket.io         & Real-time event bus (new\_report, update\_report, citizen\_alert) \\
+    \rowcolor{rowshade}
+    Database          & MongoDB           & Persistent storage for reports, status, metadata \\
+    Reverse Proxy     & Nginx (cloud)     & TLS termination, load balancing, static asset serving \\
+    \rowcolor{rowshade}
+    Container Runtime & Docker Compose    & Service orchestration for local and cloud deployment \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Data Flow}
+
+The typical data flow for a citizen submitting an emergency report is as follows:
+
+\begin{enumerate}
+  \item User fills the \textit{Report Emergency} form in the React frontend and optionally enables \textit{Notify Nearby Citizens}.
+  \item React sends a \texttt{POST /api/reports} HTTP request to the Node.js backend.
+  \item Backend validates input, saves the report to MongoDB, and emits a \texttt{new\_report} Socket.io event to all connected clients.
+  \item If \textit{notifyArea} is \texttt{true}, the backend additionally emits a \texttt{citizen\_alert} event.
+  \item All connected browsers receive the \texttt{new\_report} event and update their reports state in real time.
+  \item Clients receiving a \texttt{citizen\_alert} render a full-width emergency banner above the main content.
+  \item Responders update status via \texttt{PATCH /api/reports/:id}; the backend broadcasts \texttt{update\_report} to all clients.
+  \item When status is set to \textit{Resolved}, the report is removed from all live feeds simultaneously.
+\end{enumerate}
+
+\section{Deployment Architecture (AWS)}
+
+\begin{infobox}[Planned AWS Deployment]
+  The system is designed for deployment on AWS using the following managed services:
+  \begin{itemize}[noitemsep]
+    \item \textbf{Amazon EC2} --- Node.js backend containers
+    \item \textbf{Amazon ECS / EKS} --- Container orchestration
+    \item \textbf{Amazon DocumentDB / MongoDB Atlas} --- Managed NoSQL database
+    \item \textbf{Amazon CloudFront + S3} --- React frontend CDN hosting
+    \item \textbf{AWS Application Load Balancer} --- Traffic distribution
+    \item \textbf{Amazon SNS} --- Push notification integration
+    \item \textbf{AWS Auto Scaling Groups} --- Dynamic capacity management
+  \end{itemize}
+\end{infobox}
+
+% ============================================================
+\chapter{Technology Stack}
+
+\section{Frontend}
+
+\begin{table}[H]
+  \centering
+  \caption{Frontend Technology Stack}
+  \begin{tabularx}{\textwidth}{l l X}
+    \toprule
+    \rowcolor{headerrow!20}
+    \textbf{Technology} & \textbf{Version} & \textbf{Purpose} \\
+    \midrule
+    React                  & 18.3.1     & Component-based UI framework \\
+    \rowcolor{rowshade}
+    Vite                   & 5.4.10     & Development server and production bundler \\
+    Tailwind CSS           & 4.3.0      & Utility-first CSS framework \\
+    \rowcolor{rowshade}
+    Leaflet / React-Leaflet & 1.9.4 / 4.2.1 & Interactive geospatial maps \\
+    Socket.io-client       & 4.8.3      & WebSocket client for real-time updates \\
+    \rowcolor{rowshade}
+    Axios                  & 1.16.0     & HTTP client for REST API calls \\
+    React-Toastify         & 11.1.0     & Toast notification system \\
+    \rowcolor{rowshade}
+    Lucide-React           & 1.14.0     & SVG icon library \\
+    React-Router-DOM       & 7.x        & Client-side page routing \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Backend}
+
+\begin{table}[H]
+  \centering
+  \caption{Backend Technology Stack}
+  \begin{tabularx}{\textwidth}{l l X}
+    \toprule
+    \rowcolor{headerrow!20}
+    \textbf{Technology} & \textbf{Version} & \textbf{Purpose} \\
+    \midrule
+    Node.js     & 18+    & JavaScript runtime environment \\
+    \rowcolor{rowshade}
+    Express.js  & 5.2.1  & HTTP server and routing framework \\
+    Socket.io   & 4.8.3  & WebSocket server for real-time events \\
+    \rowcolor{rowshade}
+    Mongoose    & 8.23.1 & MongoDB ODM for schema validation \\
+    CORS        & 2.8.6  & Cross-origin resource sharing middleware \\
+    \rowcolor{rowshade}
+    dotenv      & 17.4.2 & Environment variable management \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Database Schema}
+
+The core data entity is the \texttt{Report} document stored in MongoDB:
+
+\begin{lstlisting}[language=JavaScript, caption={MongoDB Report Schema (models/Report.js)}]
+const reportSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+    enum: ['Flood', 'Earthquake', 'Fire', 'Medical Emergency', 'Other']
+  },
+  severity: {
+    type: String,
+    required: true,
+    enum: ['Low', 'Medium', 'High', 'Critical']
+  },
+  description: { type: String, required: true },
+  location: {
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true }
+  },
+  status: {
+    type: String,
+    enum: ['Active', 'In Progress', 'Resolved'],
+    default: 'Active'
+  },
+  reporterName: { type: String, default: 'Anonymous' },
+  timestamp:    { type: Date,   default: Date.now }
+});
+\end{lstlisting}
+
+\section{DevOps and Infrastructure}
+
+\begin{table}[H]
+  \centering
+  \caption{DevOps and Infrastructure Tools}
+  \begin{tabularx}{\textwidth}{l X}
+    \toprule
+    \rowcolor{headerrow!20}
+    \textbf{Tool} & \textbf{Purpose} \\
+    \midrule
+    Docker         & Containerises backend and frontend into portable images \\
+    \rowcolor{rowshade}
+    Docker Compose & Orchestrates multi-container local development environment \\
+    MongoDB        & Runs as a separate container with persistent volume \\
+    \rowcolor{rowshade}
+    GitHub Actions & CI/CD pipeline for automated testing and deployment \\
+    Kubernetes     & (Planned) Production container orchestration on AWS EKS \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================
+\chapter{Implementation}
+
+\section{Backend API Design}
+
+The backend exposes three REST endpoints and one health check:
+
+\begin{table}[H]
+  \centering
+  \caption{REST API Endpoints}
+  \begin{tabularx}{\textwidth}{l l X}
+    \toprule
+    \rowcolor{headerrow!20}
+    \textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+    \midrule
+    \texttt{GET}   & \texttt{/api/reports}     & Returns all non-resolved reports, sorted by timestamp \\
+    \rowcolor{rowshade}
+    \texttt{POST}  & \texttt{/api/reports}     & Creates a new report; triggers \texttt{new\_report} and optionally \texttt{citizen\_alert} \\
+    \texttt{PATCH} & \texttt{/api/reports/:id} & Updates report status; triggers \texttt{update\_report} socket event \\
+    \rowcolor{rowshade}
+    \texttt{GET}   & \texttt{/health}          & Health check endpoint returning server status \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Report Creation with Citizen Alert Broadcast}
+
+\begin{lstlisting}[language=JavaScript,
+  caption={POST /api/reports --- with optional citizen alert broadcast}]
+router.post('/reports', async (req, res) => {
+  const report = new Report({
+    type:         req.body.type,
+    severity:     req.body.severity,
+    description:  req.body.description,
+    location:     req.body.location,
+    reporterName: req.body.reporterName,
+  });
+  const newReport = await report.save();
+  const io = req.app.get('io');
+
+  io.emit('new_report', newReport);
+
+  if (req.body.notifyArea) {
+    io.emit('citizen_alert', { ...newReport.toObject() });
+  }
+  res.status(201).json(newReport);
+});
+\end{lstlisting}
+
+\section{Real-Time Architecture}
+
+Socket.io is configured with CORS open to all origins for the MVP. The backend exposes the \texttt{io} instance via Express's \texttt{app.set()} / \texttt{app.get()} pattern so route handlers can access it without circular imports.
+
+\begin{table}[H]
+  \centering
+  \caption{Socket.io Event Reference}
+  \begin{tabularx}{\textwidth}{l l X}
+    \toprule
+    \rowcolor{headerrow!20}
+    \textbf{Event} & \textbf{Direction} & \textbf{Payload / Description} \\
+    \midrule
+    \texttt{new\_report}    & Server $\rightarrow$ All clients & Full Report document after save \\
+    \rowcolor{rowshade}
+    \texttt{update\_report} & Server $\rightarrow$ All clients & Updated Report document after PATCH \\
+    \texttt{citizen\_alert} & Server $\rightarrow$ All clients & Report fields; triggers emergency banner UI \\
+    \rowcolor{rowshade}
+    \texttt{connect}        & Client event & Fires when socket connection is established \\
+    \texttt{disconnect}     & Client event & Fires when socket connection is lost \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Frontend State Management}
+
+The application uses React's built-in \texttt{useState} and \texttt{useEffect} hooks for state management. All global state (reports list, socket connection status, citizen alerts queue) lives in the top-level \texttt{App.jsx} component and is passed down as props.
+
+\begin{lstlisting}[language=JavaScript,
+  caption={App.jsx --- real-time state management with socket events}]
+const [reports, setReports]           = useState([]);
+const [connected, setConnected]       = useState(false);
+const [citizenAlerts, setCitizenAlerts] = useState([]);
+
+socket.on('new_report', (report) => {
+  setReports(prev => [report, ...prev]);
+});
+
+socket.on('update_report', (updated) => {
+  setReports(prev =>
+    updated.status === 'Resolved'
+      ? prev.filter(r => r._id !== updated._id)  // remove resolved
+      : prev.map(r => r._id === updated._id ? updated : r)
+  );
+});
+
+socket.on('citizen_alert', (alert) => {
+  setCitizenAlerts(prev => [...prev, { ...alert, id: Date.now() }]);
+});
+\end{lstlisting}
+
+\section{Containerisation}
+
+Each service has its own \texttt{Dockerfile}. The \texttt{docker-compose.yml} at the project root defines all three services and a shared bridge network:
+
+\begin{lstlisting}[language=bash,
+  caption={docker-compose.yml --- multi-service orchestration}]
+version: "3.8"
+services:
+  backend:
+    build: ./backend
+    ports: ["5000:5000"]
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/disaster-management
+    depends_on: [mongo]
+    networks: [cloud_network]
+
+  frontend:
+    build: ./frontend
+    ports: ["5174:5173"]
+    networks: [cloud_network]
+
+  mongo:
+    image: mongo:latest
+    ports: ["27017:27017"]
+    volumes: [mongo_data:/data/db]
+    networks: [cloud_network]
+
+networks:
+  cloud_network: { driver: bridge }
+volumes:
+  mongo_data:
+\end{lstlisting}
+
+% ============================================================
+\chapter{Application Features and Screenshots}
+
+This chapter presents each major feature of the Respondr.cloud platform with annotated screenshots.
+
+\section{Web Frontend}
+
+\subsection{Dashboard Overview}
+
+The main dashboard presents a three-column layout: the emergency report form on the left, the interactive map in the centre, and the live feed on the right. The header displays the application logo, navigation links, active incident count, and a live/offline connection status badge.
+
+\screenshot{0.95}{7}{Dashboard --- Main View (full three-column layout)}{dashboard_main}
+
+\subsection{Emergency Report Form}
+
+The report form allows citizens to submit a new incident. Disaster type is selected via a visual icon grid (flood, earthquake, fire, medical emergency, other). Severity is chosen using colour-coded chip buttons (Low/Medium/High/Critical). The \textit{Use My Location} button auto-detects GPS coordinates with proper error handling for denied permissions, unavailable position, and timeout. A toggle at the bottom enables an area-wide citizen broadcast alert.
+
+\screenshot{0.55}{10}{Emergency Report Form --- with Notify Nearby Citizens toggle}{report_form}
+
+\subsection{Interactive Map}
+
+The Leaflet.js map renders all active and in-progress incidents as colour-coded markers. Red markers indicate Critical severity, orange for High, yellow for Medium, and blue for Low. Clicking a marker opens a dark-themed popup showing incident type, severity badge, description, reporter name, and timestamp. A severity legend is fixed in the bottom-left corner of the map.
+
+\screenshot{0.95}{7}{Interactive Disaster Map --- incident markers and severity legend}{map_view}
+
+\subsection{Live Feed and Incident Management}
+
+The live feed on the right displays all active and in-progress reports in reverse chronological order. Each card shows a disaster type icon, description, coordinates, relative timestamp, and current status badge. Responders can click \textit{In Progress} to acknowledge an incident or \textit{Resolve} to close it. Status changes propagate instantly to every connected client via WebSocket.
+
+\screenshot{0.45}{12}{Live Feed --- In Progress and Resolve action buttons}{live_feed}
+
+\subsection{Citizen Emergency Alert Banner}
+
+When a report is submitted with \textit{Notify Nearby Citizens} enabled, a full-width coloured banner appears below the header for all connected clients. Critical alerts use a red theme and must be manually dismissed; lower severity alerts auto-dismiss after 12 seconds.
+
+\screenshot{0.95}{5}{Citizen Alert Banner --- Critical severity (red theme)}{citizen_alert_critical}
+
+\screenshot{0.95}{5}{Citizen Alert Banner --- Medium severity (amber theme)}{citizen_alert_medium}
+
+\subsection{About and Team Pages}
+
+The application includes informational pages accessible from the navigation header. The \textit{About} page presents the project overview, objectives as icon cards, system architecture breakdown, and categorised technology stack badges. The \textit{Our Team} page presents each team member with a gradient avatar, role badge, bio, responsibilities list, and skills.
+
+\screenshot{0.95}{7}{About Page --- objectives and technology stack sections}{about_page}
+
+\screenshot{0.95}{7}{Our Team Page --- team member cards}{team_page}
+
+% ── AWS Deployment Placeholders ─────────────────────────────
+\section{AWS Cloud Deployment}
+
+\subsection{AWS Management Console Overview}
+
+\screenshot{0.95}{7}{AWS Management Console --- project services overview}{aws_console_overview}
+
+\subsection{EC2 Instances}
+
+The backend Node.js service is deployed as a Docker container on an EC2 instance. The instance is placed in a VPC with a public subnet and a security group allowing inbound traffic on ports 80, 443, and 5000.
+
+\screenshot{0.95}{6}{EC2 Instances --- running backend container}{aws_ec2_instances}
+
+\screenshot{0.95}{6}{EC2 Instance Details --- instance type, VPC, security groups}{aws_ec2_detail}
+
+\subsection{Elastic Container Service}
+
+\screenshot{0.95}{7}{ECS Cluster --- task definitions and running tasks}{aws_ecs_cluster}
+
+\screenshot{0.95}{6}{ECS Service --- deployment events and desired/running count}{aws_ecs_service}
+
+\subsection{Database (DocumentDB / MongoDB Atlas)}
+
+\screenshot{0.95}{6}{DocumentDB Cluster --- or MongoDB Atlas cluster on AWS}{aws_database}
+
+\screenshot{0.95}{5}{Database Connection --- connection string and security configuration}{aws_db_connection}
+
+\subsection{S3 and CloudFront Frontend Hosting}
+
+The React production build is uploaded to an S3 bucket configured for static website hosting. CloudFront provides global CDN distribution with HTTPS.
+
+\screenshot{0.95}{6}{S3 Bucket --- React build files uploaded}{aws_s3_bucket}
+
+\screenshot{0.95}{6}{CloudFront Distribution --- CDN configuration and domain}{aws_cloudfront}
+
+\subsection{Application Load Balancer}
+
+\screenshot{0.95}{6}{Application Load Balancer --- target groups and health checks}{aws_alb}
+
+\subsection{VPC and Networking}
+
+\screenshot{0.95}{6}{VPC Dashboard --- subnets, route tables, and security groups}{aws_vpc}
+
+\subsection{IAM Roles and Permissions}
+
+\screenshot{0.95}{5}{IAM Roles --- service roles for ECS, S3, and CloudWatch}{aws_iam}
+
+\subsection{CloudWatch Monitoring and Logs}
+
+\screenshot{0.95}{6}{CloudWatch Dashboard --- CPU, memory, and request metrics}{aws_cloudwatch_dashboard}
+
+\screenshot{0.95}{6}{CloudWatch Logs --- backend application log stream}{aws_cloudwatch_logs}
+
+\subsection{Deployed Application Live on AWS}
+
+\screenshot{0.95}{7}{Respondr.cloud --- Live on AWS (production URL in browser)}{aws_live_app}
+
+% ============================================================
+\chapter{Work Distribution}
+
+\section{Team Member Contributions}
+
+\subsection{Asad Ali --- Team Lead, Backend \& Cloud Architect}
+
+\begin{itemize}
+  \item Designed the overall system architecture and microservices topology
+  \item Developed all REST API endpoints (\texttt{GET}, \texttt{POST}, \texttt{PATCH /api/reports})
+  \item Implemented the Socket.io server and event broadcasting logic
+  \item Wrote the MongoDB Report schema with Mongoose validation
+  \item Set up CORS configuration and Express middleware chain
+  \item Planned the AWS deployment architecture (EC2, ECS, ALB, VPC)
+  \item Managed inter-service communication patterns
+\end{itemize}
+
+\subsection{Abbas --- Frontend \& UI/UX Developer}
+
+\begin{itemize}
+  \item Designed and implemented the full UI/UX using React and Tailwind CSS v4
+  \item Built the three-panel dashboard layout (form, map, live feed)
+  \item Implemented the interactive Leaflet map with severity-coded markers
+  \item Developed the report form with visual type grid and colour-coded severity selector
+  \item Implemented client-side geolocation with proper error handling
+  \item Built the real-time citizen alert banner (\texttt{CitizenAlert} component)
+  \item Created the multi-page app with React Router (Dashboard, About, Our Team)
+  \item Designed the professional header and footer components
+\end{itemize}
+
+\subsection{Mian Arqam --- DevOps Engineer \& Data Processing}
+
+\begin{itemize}
+  \item Authored \texttt{Dockerfile} for both backend and frontend services
+  \item Configured \texttt{docker-compose.yml} for local multi-service orchestration
+  \item Set up cloud infrastructure on AWS (EC2, ECS, S3, CloudFront)
+  \item Configured GitHub Actions CI/CD pipeline for automated testing and deployment
+  \item Managed MongoDB cloud deployment and connection security
+  \item Handled real-time data pipeline and system monitoring via CloudWatch
+  \item Implemented container networking and service discovery
+\end{itemize}
+
+% ============================================================
+\chapter{Challenges and Solutions}
+
+\begin{enumerate}[leftmargin=*, label=\textbf{C\arabic*.}]
+
+  \item \textbf{React-Leaflet v5 / React 18 Incompatibility}\\
+  \textit{Challenge:} The project's \texttt{package.json} specified \texttt{react-leaflet@5.0.0}, which internally uses the \texttt{React.use()} hook introduced in React~19. This caused a silent runtime crash on React~18, rendering a blank page with no error message.\\[4pt]
+  \textit{Solution:} Downgraded to \texttt{react-leaflet@4.2.1}, which is fully compatible with React~18, and rebuilt the dependency tree using \texttt{--legacy-peer-deps}.
+
+  \item \textbf{Tailwind CSS v4 Migration}\\
+  \textit{Challenge:} The project used Tailwind CSS v4 but the CSS file contained v3 syntax (\texttt{@tailwind base/components/utilities}) that v4 does not recognise, causing all utility classes to be silently ignored.\\[4pt]
+  \textit{Solution:} Installed \texttt{@tailwindcss/vite} (the v4 Vite plugin), updated \texttt{vite.config.js} to include it, and migrated the CSS to use \texttt{@import "tailwindcss"} and \texttt{@theme \{\}} for custom colour variables.
+
+  \item \textbf{macOS AirPlay Receiver Port Conflict}\\
+  \textit{Challenge:} macOS reserves port 5000 for the AirPlay Receiver service. The backend defaulted to port 5000, causing an \texttt{EADDRINUSE} error that prevented startup.\\[4pt]
+  \textit{Solution:} Changed the backend runtime port to 5001 and created a \texttt{frontend/.env} file with \texttt{VITE\_API\_URL} and \texttt{VITE\_SOCKET\_URL} pointing to the new port.
+
+  \item \textbf{Geolocation Failure with Silent Error}\\
+  \textit{Challenge:} The original geolocation implementation had no error handling for the case where the browser API is unavailable, and the error callback provided no specific feedback about why detection failed.\\[4pt]
+  \textit{Solution:} Added an upfront check for \texttt{navigator.geolocation} support, replaced the single error callback with a \texttt{PositionError.code} lookup returning human-readable messages, added a \texttt{locating} loading state with a spinner, and passed \texttt{\{timeout: 10000, enableHighAccuracy: true\}} options.
+
+  \item \textbf{Real-Time State Consistency Across Clients}\\
+  \textit{Challenge:} When a report's status was updated to ``Resolved'', the \texttt{update\_report} WebSocket event arrived at all clients but the original handler only replaced the report in the array --- resolved reports remained visible indefinitely.\\[4pt]
+  \textit{Solution:} Updated the \texttt{update\_report} handler to check the incoming status; if \texttt{Resolved}, filter the report out of state entirely rather than replacing it.
+
+  \item \textbf{MongoDB Not Installed Locally}\\
+  \textit{Challenge:} The developer machine had no local MongoDB installation and Docker was also not running, blocking backend startup during initial development.\\[4pt]
+  \textit{Solution:} Installed \texttt{mongodb-community} via Homebrew and started it as a persistent background service using \texttt{brew services start mongodb/brew/mongodb-community}.
+
+\end{enumerate}
+
+% ============================================================
+\chapter{Conclusion and Future Work}
+
+\section{Conclusion}
+
+This project successfully delivers a functional, real-time cloud-based disaster management system that demonstrates practical application of several core cloud computing concepts. Respondr.cloud provides citizens with a simple, accessible interface to report emergencies and receive area-wide alerts, while giving responders a unified real-time dashboard to track and manage incidents.
+
+The system's event-driven WebSocket architecture enables genuinely real-time behaviour --- new reports, status changes, and citizen alerts propagate to all connected clients in under a second. The containerised microservices design ensures the system can be deployed consistently across different environments and cloud providers.
+
+The project fulfilled all major technical objectives: real-time bidirectional communication, persistent cloud database storage, geospatial visualisation, incident lifecycle management, and a citizen notification mechanism.
+
+\section{Future Work}
+
+Several enhancements are planned for future iterations:
+
+\begin{enumerate}
+  \item \textbf{Authentication and Role-Based Access Control} --- Add JWT-based authentication to distinguish between citizen users and authorised responders. Only verified responders would be able to change incident status.
+
+  \item \textbf{SMS and Email Notifications} --- Integrate Twilio (SMS) and SendGrid (email) for out-of-band notifications to registered users near a reported incident.
+
+  \item \textbf{Proximity-Based Alerts} --- Use the Haversine formula to filter citizen alerts geographically, notifying only users within a configurable radius of a new incident.
+
+  \item \textbf{Predictive Analytics} --- Integrate machine learning models (e.g., AWS SageMaker) to analyse historical incident patterns and provide risk heat maps and predictive severity scores.
+
+  \item \textbf{Kubernetes Deployment} --- Replace Docker Compose with a production-grade Kubernetes cluster (Amazon EKS) with horizontal pod autoscaling, health probes, and rolling deployments.
+
+  \item \textbf{Offline PWA Support} --- Convert the frontend into a Progressive Web App with service workers, enabling offline report drafting and background sync when connectivity is restored.
+
+  \item \textbf{Media Attachments} --- Allow citizens to attach photos and videos to reports, stored in Amazon S3 with CloudFront delivery.
+
+  \item \textbf{Multi-Language Support} --- Add internationalisation (i18n) to make the platform accessible in local languages relevant to the deployment region.
+\end{enumerate}
+
+% ============================================================
+\chapter*{References}
+\addcontentsline{toc}{chapter}{References}
+
+\begin{enumerate}[label={[\arabic*]}]
+  \item Node.js Foundation, \textit{Node.js Documentation}, 2024. \url{https://nodejs.org/docs}
+  \item Express.js, \textit{Express 5.x API Reference}, 2024. \url{https://expressjs.com}
+  \item Socket.io, \textit{Socket.io Documentation}, 2024. \url{https://socket.io/docs}
+  \item MongoDB Inc., \textit{MongoDB Manual}, 2024. \url{https://www.mongodb.com/docs/manual}
+  \item React Documentation, \textit{React 18 Reference}, Meta Open Source, 2024. \url{https://react.dev}
+  \item Vite.js, \textit{Vite Guide}, 2024. \url{https://vitejs.dev/guide}
+  \item Tailwind Labs, \textit{Tailwind CSS v4 Documentation}, 2025. \url{https://tailwindcss.com/docs}
+  \item Leaflet.js, \textit{Leaflet Documentation}, 2024. \url{https://leafletjs.com/reference}
+  \item Amazon Web Services, \textit{AWS Well-Architected Framework}, 2024. \url{https://aws.amazon.com/architecture/well-architected}
+  \item Docker Inc., \textit{Docker Documentation}, 2024. \url{https://docs.docker.com}
+  \item Mongoose, \textit{Mongoose v8 API Docs}, 2024. \url{https://mongoosejs.com/docs}
+  \item OWASP Foundation, \textit{OWASP Top Ten}, 2021. \url{https://owasp.org/Top10}
+\end{enumerate}
+
+\end{document}

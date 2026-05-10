@@ -21,7 +21,7 @@ const reportSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Active', 'Resolved'],
+    enum: ['Active', 'In Progress', 'Resolved'],
     default: 'Active'
   },
   reporterName: {
