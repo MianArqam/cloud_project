@@ -22,17 +22,49 @@ jobs:
         uses: actions/checkout@v3
 
       # ==========================================
-      # 🧼 STEP 1.5: SANITIZE AWS CREDENTIALS
+      # 🧼 STEP 1.5: SANITIZE & VALIDATE AWS CREDENTIALS
       # ==========================================
-      - name: Sanitize AWS Credentials
+      - name: Sanitize & Validate AWS Credentials
         run: |
-          # Strip any whitespace, tabs, or newlines that are commonly copied from Excel cells
-          CLEAN_ID=$(echo "${{ secrets.AWS_ACCESS_KEY_ID }}" | tr -d '[:space:]')
-          CLEAN_SECRET=$(echo "${{ secrets.AWS_SECRET_ACCESS_KEY }}" | tr -d '[:space:]')
+          RAW_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+          RAW_SECRET="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           
-          # Export to GITHUB_ENV so all subsequent AWS & Terraform tools use them perfectly
+          echo "=========================================="
+          echo "🔍 DIAGNOSTIC: Checking your GitHub Secrets..."
+          echo "• AWS_ACCESS_KEY_ID has ${#RAW_ID} characters."
+          echo "• AWS_SECRET_ACCESS_KEY has ${#RAW_SECRET} characters."
+          echo "=========================================="
+
+          # 1. Check if keys are swapped or incorrect
+          if [[ "$RAW_ID" == *"/"* ]]; then
+            echo "❌ ERROR: Your AWS_ACCESS_KEY_ID secret contains a forward slash (/)!"
+            echo "👉 This proves you pasted your 'Secret Access Key' into 'AWS_ACCESS_KEY_ID'."
+            echo "👉 Please edit your GitHub Secrets and swap them back!"
+            exit 1
+          fi
+
+          if [[ ${#RAW_ID} -eq 40 ]]; then
+            echo "❌ ERROR: Your AWS_ACCESS_KEY_ID is 40 characters long!"
+            echo "👉 40 characters is the length of a 'Secret Access Key'. Your keys are swapped."
+            echo "👉 Please edit your GitHub Secrets and swap them back!"
+            exit 1
+          fi
+
+          if [[ ${#RAW_SECRET} -eq 20 ]]; then
+            echo "❌ ERROR: Your AWS_SECRET_ACCESS_KEY is only 20 characters long!"
+            echo "👉 20 characters is the length of an 'Access Key ID'. Your keys are swapped."
+            echo "👉 Please edit your GitHub Secrets and swap them back!"
+            exit 1
+          fi
+
+          # 2. Perform sanitization (strip any leading/trailing Excel whitespace)
+          CLEAN_ID=$(echo "$RAW_ID" | tr -d '[:space:]')
+          CLEAN_SECRET=$(echo "$RAW_SECRET" | tr -d '[:space:]')
+          
+          # 3. Export clean keys to GITHUB_ENV for all subsequent actions
           echo "AWS_ACCESS_KEY_ID=$CLEAN_ID" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$CLEAN_SECRET" >> $GITHUB_ENV
+          echo "✅ Credentials validated and cleaned successfully!"
 
       # ==========================================
       # 🔧 STEP 2: CONFIGURE AWS CREDENTIALS
