@@ -55,8 +55,6 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ./terraform
-        env:
-          TF_VAR_mongodb_uri: ${{ secrets.MONGODB_URI }}
 
       # ==========================================
       # 🌐 STEP 5: FETCH TERRAFORM OUTPUTS

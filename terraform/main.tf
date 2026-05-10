@@ -335,17 +335,18 @@ resource "aws_cloudwatch_log_group" "ecs_log_group" {
   retention_in_days = 7
 }
 
-# ECS Fargate Task Definition
+# ECS Fargate Task Definition (Multi-container Pod hosting App + MongoDB)
 resource "aws_ecs_task_definition" "backend" {
   family                   = "${var.project_name}-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256" # 0.25 vCPU (Free Tier Friendly)
-  memory                   = "512" # 512 MB RAM (Free Tier Friendly)
+  cpu                      = "512"  # 0.5 vCPU (Comfortably hosts both app + DB)
+  memory                   = "1024" # 1 GB RAM (Comfortably hosts both app + DB)
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([
+    # Container 1: Node.js API Server
     {
       name      = "backend"
       image     = "${aws_ecr_repository.backend.repository_url}:latest"
@@ -358,7 +359,7 @@ resource "aws_ecs_task_definition" "backend" {
       ]
       environment = [
         { name = "PORT", value = "5000" },
-        { name = "MONGODB_URI", value = var.mongodb_uri }
+        { name = "MONGODB_URI", value = "mongodb://127.0.0.1:27017/disaster-management" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -366,6 +367,32 @@ resource "aws_ecs_task_definition" "backend" {
           awslogs-group         = aws_cloudwatch_log_group.ecs_log_group.name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "backend"
+        }
+      }
+      dependsOn = [
+        {
+          containerName = "mongodb"
+          condition     = "START"
+        }
+      ]
+    },
+    # Container 2: MongoDB Database Service
+    {
+      name      = "mongodb"
+      image     = "mongo:6.0"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 27017
+          hostPort      = 27017
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_log_group.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "mongodb"
         }
       }
     }
