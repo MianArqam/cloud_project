@@ -110,7 +110,7 @@ jobs:
           ALB_DNS=$(terraform output -raw backend_alb_dns_name)
           S3_BUCKET=$(terraform output -raw s3_bucket_name)
           ECR_REPO=$(terraform output -raw ecr_repository_url)
-          CF_DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[0].Id=='S3-Frontend'].Id" --output text)
+          CF_DIST_ID=$(terraform output -raw cloudfront_distribution_id)
           
           echo "ALB_DNS=$ALB_DNS" >> $GITHUB_ENV
           echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_ENV

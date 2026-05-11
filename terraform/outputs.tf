@@ -17,3 +17,8 @@ output "ecr_repository_url" {
   value       = aws_ecr_repository.backend.repository_url
   description = "The URL of the ECR repository for the backend Docker image"
 }
+
+output "cloudfront_distribution_id" {
+  value       = aws_cloudfront_distribution.cdn.id
+  description = "The ID of the CloudFront distribution"
+}
