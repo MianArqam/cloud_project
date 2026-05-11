@@ -150,8 +150,8 @@ jobs:
         run: npm run build
         working-directory: ./frontend
         env:
-          VITE_API_URL: http://${{ env.ALB_DNS }}/api
-          VITE_SOCKET_URL: http://${{ env.ALB_DNS }}
+          VITE_API_URL: /api
+          VITE_SOCKET_URL: /
 
       # ==========================================
       # 📤 STEP 8: UPLOAD FRONTEND TO S3 & INVALIDATE CDN
